@@ -223,23 +223,22 @@ class TESSSearch(MASTSearch):
         tesscut_year = []
 
         for sector in sector_list:
+            match = pointings[pointings["Sector"] == sector]
+            if len(match) == 0:
+                raise ValueError(
+                    f"No pointing information for sector {sector}. "
+                    "Try updating the tesswcs package."
+                )
+            pointing = match[0]
             log.debug(f"Target Observable in Sector {sector}")
             tesscut_desc.append(f"TESS FFI Cutout (sector {sector})")
             tesscut_mission.append(f"TESS Sector {sector:02d}")
-            tesscut_tmin.append(
-                pointings[sector - 1]["Start"] - 2400000.5
-            )  # Time(row[5], format="jd").iso)
-            tesscut_tmax.append(
-                pointings[sector - 1]["End"] - 2400000.5
-            )  # Time(row[6], format="jd").iso)
+            tesscut_tmin.append(pointing["Start"] - 2400000.5)
+            tesscut_tmax.append(pointing["End"] - 2400000.5)
             tesscut_exptime.append(self._sector2ffiexptime(sector))
             tesscut_seqnum.append(sector)
             tesscut_year.append(
-                int(
-                    np.floor(
-                        Time(pointings[sector - 1]["Start"], format="jd").decimalyear
-                    )
-                )
+                int(np.floor(Time(pointing["Start"], format="jd").decimalyear))
             )
 
         # Build the FFI dataframe from the observability
