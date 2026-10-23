@@ -222,14 +222,15 @@ class TESSSearch(MASTSearch):
         tesscut_seqnum = []
         tesscut_year = []
 
+        sector_rows = {int(s): i for i, s in enumerate(pointings["Sector"])}
+
         for sector in sector_list:
-            match = pointings[pointings["Sector"] == sector]
-            if len(match) == 0:
+            if sector not in sector_rows:
                 raise ValueError(
                     f"No pointing information for sector {sector}. "
                     "Try updating the tesswcs package."
                 )
-            pointing = match[0]
+            pointing = pointings[sector_rows[sector]]
             log.debug(f"Target Observable in Sector {sector}")
             tesscut_desc.append(f"TESS FFI Cutout (sector {sector})")
             tesscut_mission.append(f"TESS Sector {sector:02d}")
